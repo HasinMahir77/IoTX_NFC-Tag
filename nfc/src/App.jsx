@@ -1,35 +1,58 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import axios from 'axios';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import AddGuitar from './components/AddGuitar';
+import ViewGuitar from './components/ViewGuitar';
+import './App.css';
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = ({ server }) => {
+  const [guitarExists, setGuitarExists] = useState(null);
+  const location = useLocation();
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const nfcTag = queryParams.get('nfc');
+
+    if (nfcTag) {
+      const checkGuitarExists = async () => {
+        try {
+          const response = await axios.get(`${server}/guitar/${nfcTag}`);
+          setGuitarExists(true);
+        } catch (error) {
+          if (error.response && error.response.status === 404) {
+            setGuitarExists(false);
+          } else {
+            console.error('Error checking guitar:', error);
+          }
+        }
+      };
+
+      checkGuitarExists();
+    }
+  }, [location.search, server]);
+
+  if (guitarExists === null) {
+    return <div>Loading...</div>;
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div>
+      {guitarExists ? (
+        <ViewGuitar server={server} tag_id={new URLSearchParams(location.search).get('nfc')} />
+      ) : (
+        <AddGuitar server={server} tag_id={new URLSearchParams(location.search).get('nfc')} />
+      )}
+    </div>
+  );
+};
 
-export default App
+const MainApp = () => (
+  <Router>
+    <Routes>
+      <Route path="/nfc_tag" element={<App server="http://localhost:2000" />} />
+    </Routes>
+  </Router>
+);
+
+export default MainApp;
