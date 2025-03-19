@@ -36,21 +36,30 @@ const App = ({ server }) => {
     return <div>Loading...</div>;
   }
 
+  const nfcTag = new URLSearchParams(location.search).get('nfc');
+
   return (
     <div>
       {guitarExists ? (
-        <ViewGuitar server={server} tag_id={new URLSearchParams(location.search).get('nfc')} />
+        <ViewGuitar server={server} tag_id={nfcTag} />
       ) : (
-        <AddGuitar server={server} tag_id={new URLSearchParams(location.search).get('nfc')} />
+        <AddGuitar server={server} tag_id={nfcTag} />
       )}
     </div>
   );
 };
 
+const Home = () => (
+  <div>
+    <h1>Please use a valid URL or Add/View a guitar</h1>
+  </div>
+);
+
 const MainApp = () => (
   <Router>
     <Routes>
-      <Route path="/nfc_tag" element={<App server="http://localhost:2000" />} />
+      <Route path="/" element={<Home />} />
+      <Route path="/nfc_tag" element={<App server="http://192.168.0.137:2000" />} />
     </Routes>
   </Router>
 );

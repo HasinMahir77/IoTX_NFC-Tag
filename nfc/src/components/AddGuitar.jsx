@@ -24,6 +24,7 @@ const AddGuitar = ({server, tag_id }) => {
     try {
       await axios.post(server+'/add_guitar', guitar);
       alert('Guitar added successfully!');
+      window.location.reload(); // Refresh the page
     } catch (error) {
       console.error('Error adding guitar:', error);
       alert('Failed to add guitar.');

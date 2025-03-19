@@ -16,11 +16,12 @@ with app.app_context():
 @app.route('/add_guitar', methods=['POST'])
 def add_guitar():
     data = request.json
-    if not data or not all(k in data for k in ["name", "model", "manufacture_year"]):
+    if not data or not all(k in data for k in ["tag_id", "name", "model", "manufacture_year"]):
         return jsonify({"error": "Invalid input"}), 400
 
     try:
         new_guitar = Guitar(
+            tag_id=data['tag_id'],
             name=data['name'],
             model=data['model'],
             manufacture_year=int(data['manufacture_year'])
@@ -38,7 +39,7 @@ def get_guitars():
     return jsonify([guitar.to_dict() for guitar in guitars])
 
 # Route to get a guitar by tag_id
-@app.route('/guitar/<int:tag_id>', methods=['GET'])
+@app.route('/guitar/<string:tag_id>', methods=['GET'])
 def get_guitar(tag_id):
     guitar = Guitar.query.get(tag_id)
     if not guitar:
@@ -46,7 +47,7 @@ def get_guitar(tag_id):
     return jsonify(guitar.to_dict())
 
 # Route to delete a guitar by tag_id
-@app.route('/delete_guitar/<int:tag_id>', methods=['DELETE'])
+@app.route('/delete_guitar/<string:tag_id>', methods=['DELETE'])
 def delete_guitar(tag_id):
     guitar = Guitar.query.get(tag_id)
     if not guitar:
@@ -57,4 +58,4 @@ def delete_guitar(tag_id):
     return jsonify({"message": "Guitar deleted successfully!"})
 
 if __name__ == '__main__':
-    app.run(debug=True, port=2000)
+    app.run(debug=True, port=2000, host="0.0.0.0")

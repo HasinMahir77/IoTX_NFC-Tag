@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 class Guitar(db.Model):
-    tag_id = db.Column(db.Integer, primary_key=True)
+    tag_id = db.Column(db.String(8), primary_key=True)  # Update tag_id to be a string with a fixed length
     name = db.Column(db.String(80), nullable=False)
     model = db.Column(db.String(120), nullable=False)
     manufacture_year = db.Column(db.Integer, nullable=False)
