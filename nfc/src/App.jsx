@@ -12,12 +12,12 @@ const App = ({ server }) => {
 
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
-    const nfcTag = queryParams.get('nfc');
+    const nfcTagInt = queryParams.get('nfc');
 
-    if (nfcTag) {
+    if (nfcTagInt) {
       const checkGuitarExists = async () => {
         try {
-          const response = await axios.get(`${server}/guitar/${nfcTag}`);
+          const response = await axios.get(`${server}/guitar/${nfcTagInt}`);
           setGuitarExists(true);
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -36,14 +36,14 @@ const App = ({ server }) => {
     return <div>Loading...</div>;
   }
 
-  const nfcTag = new URLSearchParams(location.search).get('nfc');
+  const nfcTagInt = new URLSearchParams(location.search).get('nfc');
 
   return (
     <div>
       {guitarExists ? (
-        <ViewGuitar server={server} tag_id={nfcTag} />
+        <ViewGuitar server={server} tag_id={nfcTagInt} />
       ) : (
-        <AddGuitar server={server} tag_id={nfcTag} />
+        <AddGuitar server={server} tag_id={nfcTagInt} />
       )}
     </div>
   );
