@@ -35,7 +35,7 @@ const ViewGuitar = ({ server, tag_id }) => {
       <Form>
         <Form.Group className="mb-3" controlId="formTagId">
           <Form.Label>Tag ID</Form.Label>
-          <Form.Control type="text" value={guitar.tag_id} readOnly />
+          <Form.Control type="text" value={guitar.tag_id} readOnly disabled />
         </Form.Group>
 
         <Form.Group className="mb-3" controlId="formGuitarName">
