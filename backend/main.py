@@ -58,4 +58,4 @@ def delete_guitar(tag_id):
     return jsonify({"message": "Guitar deleted successfully!"})
 
 if __name__ == '__main__':
-    app.run(debug=True, port=2000, host="0.0.0.0")
+    app.run(port=2000, host="0.0.0.0")

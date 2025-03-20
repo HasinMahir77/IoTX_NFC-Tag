@@ -62,7 +62,7 @@ const MainApp = () => (
   <Router>
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/nfc_tag" element={<App server="http://192.168.0.137:2000" />} />
+      <Route path="/nfc_tag" element={<App server="http://199.250.210.176:2001" />} />
       <Route path="*" element={<Navigate to="/" />} /> {/* Catch-all route */}
     </Routes>
   </Router>
