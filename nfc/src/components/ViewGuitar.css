@@ -12,11 +12,11 @@
     /* border: 2px solid #a6a6b1; */
     border-radius: 50%;
     position: relative;
-    top: 4vh;
+    top: 3vh;
 }
 
 .guitar-info h2 {
-    margin-bottom: 5vh;
+    margin-bottom: 3vh;
     color: black;
 }
 .form-container {
