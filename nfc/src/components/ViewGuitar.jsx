@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Form, Button } from 'react-bootstrap';
 import axios from 'axios';
 import './ViewGuitar.css'; // Import the CSS file
+import guitar_icon from '../assets/guitar_circle.png';
 
 const ViewGuitar = ({ server, tag_id }) => {
   const [guitar, setGuitar] = useState({
@@ -28,6 +29,9 @@ const ViewGuitar = ({ server, tag_id }) => {
   return (
     <div className="guitar-info">
         <h2>Guitar Info</h2>
+        <img src={guitar_icon} alt="Guitar Icon" className="guitar-icon" />
+
+      <div className='form-container'>
       <Form>
         <Form.Group className="mb-3" controlId="formTagId">
           <Form.Label>Tag ID</Form.Label>
@@ -60,11 +64,8 @@ const ViewGuitar = ({ server, tag_id }) => {
             readOnly
           />
         </Form.Group>
-
-        <Button variant="primary" type="button" onClick={() => window.history.back()}>
-          Back
-        </Button>
       </Form>
+      </div>
     </div>
   );
 };

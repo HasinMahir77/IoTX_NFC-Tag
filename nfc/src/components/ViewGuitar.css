@@ -1,0 +1,55 @@
+.guitar-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
+    background-color: aliceblue;
+}
+.guitar-icon {
+    width: 100px; /* Set the desired width */
+    /* border: 2px solid #a6a6b1; */
+    border-radius: 50%;
+    position: relative;
+    top: 4vh;
+}
+
+.guitar-info h2 {
+    margin-bottom: 5vh;
+    color: black;
+}
+.form-container {
+    padding-top: 2vh;
+    border: 2px solid #a6a6b1;
+    border-radius: 8px;
+    width: fit-content;
+    height: fit-content;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.guitar-info div form {
+    margin: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.guitar-info div form div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.guitar-info div form div label {
+    font-weight: 500;
+}
+
+.guitar-info div form button {
+    border-radius: 10px;
+    align-self: center; /* Center the button within the form */
+}

@@ -39,7 +39,7 @@ const App = ({ server }) => {
   const nfcTagInt = new URLSearchParams(location.search).get('nfc');
 
   return (
-    <div>
+    <div className='mainApp'>
       {guitarExists ? (
         <ViewGuitar server={server} tag_id={nfcTagInt} />
       ) : (

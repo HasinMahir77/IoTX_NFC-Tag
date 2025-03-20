@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Form, Button } from 'react-bootstrap';
 import axios from 'axios';
-import './AddGuitar.css'; // Import the CSS file
+import './ViewGuitar.css'; // Import the CSS file
+import guitar_icon from '../assets/guitar_circle.png';
 
 const AddGuitar = ({server, tag_id }) => {
   const [guitar, setGuitar] = useState({
@@ -34,6 +35,8 @@ const AddGuitar = ({server, tag_id }) => {
   return (
     <div className="guitar-info">
       <h2>Add Guitar</h2>
+      <img src={guitar_icon} alt="Guitar Icon" className="guitar-icon" />
+      <div className='form-container'>
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3" controlId="formTagId">
           <Form.Label>Tag ID</Form.Label>
@@ -77,6 +80,7 @@ const AddGuitar = ({server, tag_id }) => {
           Save
         </Button>
       </Form>
+      </div>
     </div>
   );
 };
