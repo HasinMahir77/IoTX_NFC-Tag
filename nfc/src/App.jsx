@@ -52,7 +52,7 @@ const App = ({ server }) => {
 const Home = () => (
   <div>
     <h1>Please use a valid URL or Add/View a guitar.</h1>
-    <a href="http://199.250.210.176:5173/nfc_tag?nfc=1">Example link</a>
+    <a href="http://199.250.210.176/nfc_tag?nfc=1">Example link</a>
     
 
   </div>
