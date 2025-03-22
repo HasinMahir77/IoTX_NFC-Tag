@@ -52,7 +52,7 @@ const App = ({ server }) => {
 const Home = () => (
   <div>
     <h1>Please use a valid URL or Add/View a guitar.</h1>
-    <a href="http://199.250.210.176/nfc_tag?nfc=1">Example link</a>
+    <a href="http://nfc.iotexperience.com/nfc_tag?nfc=1">Example link</a>
     
 
   </div>
@@ -62,7 +62,7 @@ const MainApp = () => (
   <Router>
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/nfc_tag" element={<App server="http://199.250.210.176:3000" />} />
+      <Route path="/nfc_tag" element={<App server="http://nfc.iotexperience.com:3000" />} />
       <Route path="*" element={<Navigate to="/" />} /> {/* Catch-all route */}
     </Routes>
   </Router>
