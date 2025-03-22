@@ -8,6 +8,7 @@ const AddGuitar = ({server, tag_id }) => {
   const [guitar, setGuitar] = useState({
     tag_id: tag_id,
     name: '',
+    manufacturer: '',
     model: '',
     manufacture_year: '',
     serial:''
@@ -25,11 +26,11 @@ const AddGuitar = ({server, tag_id }) => {
     e.preventDefault();
     try {
       await axios.post(server+'/add_instrument', guitar);
-      alert('Guitar added successfully!');
+      alert('Instrument added successfully!');
       window.location.reload(); // Refresh the page
     } catch (error) {
-      console.error('Error adding guitar:', error);
-      alert('Failed to add guitar.');
+      console.error('Error adding Instrument:', error);
+      alert('Failed to add instrument.');
     }
   };
 
@@ -51,6 +52,16 @@ const AddGuitar = ({server, tag_id }) => {
             placeholder="Enter guitar name"
             name="name"
             value={guitar.name}
+            onChange={handleChange}
+          />
+        </Form.Group>
+        <Form.Group className="mb-3" controlId="formGuitarManufacturer">
+          <Form.Label>Manufacturer</Form.Label>
+          <Form.Control
+            type="text"
+            placeholder="Manufacturer"
+            name="manufacturer"
+            value={guitar.manufacturer}
             onChange={handleChange}
           />
         </Form.Group>

@@ -8,6 +8,7 @@ const ViewGuitar = ({ server, tag_id }) => {
   const [guitar, setGuitar] = useState({
     tag_id: tag_id,
     name: '',
+    manufacturer: '',
     model: '',
     serial: '',
     manufacture_date: ''
@@ -47,6 +48,14 @@ const ViewGuitar = ({ server, tag_id }) => {
             readOnly
           />
         </Form.Group>
+        <Form.Group className="mb-3" controlId="formGuitarManufacturer">
+                  <Form.Label>Manufacturer</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={guitar.manufacturer}
+                    readOnly
+                  />
+                </Form.Group>
 
         <Form.Group className="mb-3" controlId="formGuitarModel">
           <Form.Label>Model</Form.Label>

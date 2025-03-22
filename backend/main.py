@@ -16,6 +16,7 @@ with app.app_context():
 @app.route('/add_instrument', methods=['POST'])
 def add_instrument():
     data = request.json
+    print(data)
     if not data or not all(k in data for k in ["tag_id", "name", "manufacturer", "model", "serial", "manufacture_date"]):
         return jsonify({"error": "Invalid input"}), 400
 
@@ -32,7 +33,7 @@ def add_instrument():
         db.session.commit()
         return jsonify({"message": "Instrument added successfully!", "instrument": new_instrument.to_dict()}), 201
     except ValueError:
-        return jsonify({"error": "Invalid manufacture_date format"}), 400
+        return jsonify({"error": "Invalid manufacture_date format"}), 407
 
 # Route to get all instruments
 @app.route('/instruments', methods=['GET'])
