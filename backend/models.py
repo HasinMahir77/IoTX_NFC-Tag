@@ -2,16 +2,20 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-class Guitar(db.Model):
+class Intrument(db.Model):
     tag_id = db.Column(db.Integer, primary_key=True)  
-    name = db.Column(db.String(80), nullable=False)
-    model = db.Column(db.String(120), nullable=False)
-    manufacture_year = db.Column(db.Integer, nullable=False)
+    name = db.Column(db.String(30), nullable=False)
+    manufacturer = db.Column(db.String(30), nullable=False)
+    model = db.Column(db.String(30), nullable=False)
+    serial = db.Column(db.String(30), nullable=False)
+    manufacture_date = db.Column(db.Integer, nullable=False)
 
     def to_dict(self):
         return {
             "tag_id": self.tag_id,
             "name": self.name,
+            "manufacturer": self.manufacturer,
             "model": self.model,
-            "manufacture_year": self.manufacture_year
+            "serial": self.serial,
+            "manufacture_date": self.manufacture_date
         }

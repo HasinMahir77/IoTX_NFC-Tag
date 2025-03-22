@@ -17,7 +17,7 @@ const App = ({ server }) => {
     if (nfcTagInt) {
       const checkGuitarExists = async () => {
         try {
-          const response = await axios.get(`${server}/guitar/${nfcTagInt}`);
+          const response = await axios.get(`${server}/instrument/${nfcTagInt}`);
           setGuitarExists(true);
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -50,8 +50,8 @@ const App = ({ server }) => {
 };
 
 const Home = () => (
-  <div>
-    <h1>Please use a valid URL or Add/View a guitar.</h1>
+  <div className='mainDiv'>
+    <h1 className='urlHeader'>Please use a valid URL or Add/View an instrument.</h1>
     <a href="http://nfc.iotexperience.com/nfc_tag?nfc=1">Example link</a>
     
 
@@ -62,7 +62,7 @@ const MainApp = () => (
   <Router>
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/nfc_tag" element={<App server="http://nfc.iotexperience.com:3000" />} />
+      <Route path="/nfc_tag" element={<App server="http://127.0.0.1:3000" />} />
       <Route path="*" element={<Navigate to="/" />} /> {/* Catch-all route */}
     </Routes>
   </Router>

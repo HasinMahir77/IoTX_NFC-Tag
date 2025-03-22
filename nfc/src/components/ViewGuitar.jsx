@@ -9,13 +9,14 @@ const ViewGuitar = ({ server, tag_id }) => {
     tag_id: tag_id,
     name: '',
     model: '',
-    manufacture_year: ''
+    serial: '',
+    manufacture_date: ''
   });
 
   useEffect(() => {
     const fetchGuitar = async () => {
       try {
-        const response = await axios.get(`${server}/guitar/${tag_id}`);
+        const response = await axios.get(`${server}/instrument/${tag_id}`);
         setGuitar(response.data);
       } catch (error) {
         console.error('Error fetching guitar:', error);
@@ -28,7 +29,7 @@ const ViewGuitar = ({ server, tag_id }) => {
 
   return (
     <div className="guitar-info">
-        <h2>Guitar Info</h2>
+        <h2>Instrument Info</h2>
         <img src={guitar_icon} alt="Guitar Icon" className="guitar-icon" />
 
       <div className='form-container'>
@@ -39,7 +40,7 @@ const ViewGuitar = ({ server, tag_id }) => {
         </Form.Group>
 
         <Form.Group className="mb-3" controlId="formGuitarName">
-          <Form.Label>Guitar Name</Form.Label>
+          <Form.Label>Name</Form.Label>
           <Form.Control
             type="text"
             value={guitar.name}
@@ -48,19 +49,27 @@ const ViewGuitar = ({ server, tag_id }) => {
         </Form.Group>
 
         <Form.Group className="mb-3" controlId="formGuitarModel">
-          <Form.Label>Guitar Model</Form.Label>
+          <Form.Label>Model</Form.Label>
           <Form.Control
             type="text"
             value={guitar.model}
             readOnly
           />
         </Form.Group>
-
-        <Form.Group className="mb-3" controlId="formManufactureYear">
-          <Form.Label>Manufacture Year</Form.Label>
+        <Form.Group className="mb-3" controlId="formGuitarSerial">
+          <Form.Label>Serial</Form.Label>
           <Form.Control
             type="text"
-            value={guitar.manufacture_year}
+            value={guitar.serial}
+            readOnly
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3" controlId="formManufactureYear">
+          <Form.Label>Manufacture Date</Form.Label>
+          <Form.Control
+            type="text"
+            value={guitar.manufacture_date}
             readOnly
           />
         </Form.Group>

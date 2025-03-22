@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from models import db, Guitar  # Import Guitar instead of User
+from models import db, Intrument  # Import Intrument instead of Guitar
 from config import Config
 
 app = Flask(__name__)
@@ -12,50 +12,52 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
 
-# Route to add a new guitar
-@app.route('/add_guitar', methods=['POST'])
-def add_guitar():
+# Route to add a new instrument
+@app.route('/add_instrument', methods=['POST'])
+def add_instrument():
     data = request.json
-    if not data or not all(k in data for k in ["tag_id", "name", "model", "manufacture_year"]):
+    if not data or not all(k in data for k in ["tag_id", "name", "manufacturer", "model", "serial", "manufacture_date"]):
         return jsonify({"error": "Invalid input"}), 400
 
     try:
-        new_guitar = Guitar(
-            tag_id=data['tag_id'],
+        new_instrument = Intrument(
+            tag_id=int(data['tag_id']),
             name=data['name'],
+            manufacturer=data['manufacturer'],
             model=data['model'],
-            manufacture_year=int(data['manufacture_year'])
+            serial=data['serial'],
+            manufacture_date=int(data['manufacture_date'])
         )
-        db.session.add(new_guitar)
+        db.session.add(new_instrument)
         db.session.commit()
-        return jsonify({"message": "Guitar added successfully!", "guitar": new_guitar.to_dict()}), 201
+        return jsonify({"message": "Instrument added successfully!", "instrument": new_instrument.to_dict()}), 201
     except ValueError:
-        return jsonify({"error": "Invalid manufacture_year format"}), 400
+        return jsonify({"error": "Invalid manufacture_date format"}), 400
 
-# Route to get all guitars
-@app.route('/guitars', methods=['GET'])
-def get_guitars():
-    guitars = Guitar.query.all()
-    return jsonify([guitar.to_dict() for guitar in guitars])
+# Route to get all instruments
+@app.route('/instruments', methods=['GET'])
+def get_instruments():
+    instruments = Intrument.query.all()
+    return jsonify([instrument.to_dict() for instrument in instruments])
 
-# Route to get a guitar by tag_id
-@app.route('/guitar/<string:tag_id>', methods=['GET'])
-def get_guitar(tag_id):
-    guitar = Guitar.query.get(tag_id)
-    if not guitar:
-        return jsonify({"error": "Guitar not found"}), 404
-    return jsonify(guitar.to_dict())
+# Route to get an instrument by tag_id
+@app.route('/instrument/<int:tag_id>', methods=['GET'])
+def get_instrument(tag_id):
+    instrument = Intrument.query.get(tag_id)
+    if not instrument:
+        return jsonify({"error": "Instrument not found"}), 404
+    return jsonify(instrument.to_dict())
 
-# Route to delete a guitar by tag_id
-@app.route('/delete_guitar/<string:tag_id>', methods=['DELETE'])
-def delete_guitar(tag_id):
-    guitar = Guitar.query.get(tag_id)
-    if not guitar:
-        return jsonify({"error": "Guitar not found"}), 404
+# Route to delete an instrument by tag_id
+@app.route('/delete_instrument/<int:tag_id>', methods=['DELETE'])
+def delete_instrument(tag_id):
+    instrument = Intrument.query.get(tag_id)
+    if not instrument:
+        return jsonify({"error": "Instrument not found"}), 404
 
-    db.session.delete(guitar)
+    db.session.delete(instrument)
     db.session.commit()
-    return jsonify({"message": "Guitar deleted successfully!"})
+    return jsonify({"message": "Instrument deleted successfully!"})
 
 if __name__ == '__main__':
-    app.run(port=3000, host="0.0.0.0")
+    app.run(port=3000, host="0.0.0.0", debug=True)

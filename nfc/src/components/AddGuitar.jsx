@@ -9,7 +9,8 @@ const AddGuitar = ({server, tag_id }) => {
     tag_id: tag_id,
     name: '',
     model: '',
-    manufacture_year: ''
+    manufacture_year: '',
+    serial:''
   });
 
   const handleChange = (e) => {
@@ -23,7 +24,7 @@ const AddGuitar = ({server, tag_id }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(server+'/add_guitar', guitar);
+      await axios.post(server+'/add_instrument', guitar);
       alert('Guitar added successfully!');
       window.location.reload(); // Refresh the page
     } catch (error) {
@@ -34,7 +35,7 @@ const AddGuitar = ({server, tag_id }) => {
 
   return (
     <div className="guitar-info">
-      <h2>Add Guitar</h2>
+      <h2>Add Instrument</h2>
       <img src={guitar_icon} alt="Guitar Icon" className="guitar-icon" />
       <div className='form-container'>
       <Form onSubmit={handleSubmit}>
@@ -44,7 +45,7 @@ const AddGuitar = ({server, tag_id }) => {
         </Form.Group>
 
         <Form.Group className="mb-3" controlId="formGuitarName">
-          <Form.Label>Guitar Name</Form.Label>
+          <Form.Label>Name</Form.Label>
           <Form.Control
             type="text"
             placeholder="Enter guitar name"
@@ -55,7 +56,7 @@ const AddGuitar = ({server, tag_id }) => {
         </Form.Group>
 
         <Form.Group className="mb-3" controlId="formGuitarModel">
-          <Form.Label>Guitar Model</Form.Label>
+          <Form.Label>Model</Form.Label>
           <Form.Control
             type="text"
             placeholder="Enter guitar model"
@@ -64,14 +65,24 @@ const AddGuitar = ({server, tag_id }) => {
             onChange={handleChange}
           />
         </Form.Group>
-
-        <Form.Group className="mb-3" controlId="formManufactureYear">
-          <Form.Label>Manufacture Year</Form.Label>
+        <Form.Group className="mb-3" controlId="formGuitarModel">
+          <Form.Label>Serial No.</Form.Label>
           <Form.Control
             type="text"
-            placeholder="Enter manufacture year"
-            name="manufacture_year"
-            value={guitar.manufacture_year}
+            placeholder="Enter serial"
+            name="serial"
+            value={guitar.serial}
+            onChange={handleChange}
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3" controlId="formManufactureYear">
+          <Form.Label>Manufacture Date</Form.Label>
+          <Form.Control
+            type="text"
+            placeholder="Enter manufacture date"
+            name="manufacture_date"
+            value={guitar.manufacture_date}
             onChange={handleChange}
           />
         </Form.Group>
