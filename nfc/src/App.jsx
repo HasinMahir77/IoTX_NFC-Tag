@@ -3,9 +3,7 @@ import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'r
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import GuitarApp from './components/GuitarApp';
-import ViewGuitar from './components/ViewGuitar';
 import './App.css';
-import placeholderGuitar from './assets/placeholderGuitar.png';
 
 const App = ({ server }) => {
   const [guitarExists, setGuitarExists] = useState(null);
@@ -65,7 +63,7 @@ const MainApp = () => (
   <Router>
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/nfc_tag" element={<App server="http://192.168.0.137:3000" />} />
+      <Route path="/nfc_tag" element={<App server="nfc.iotexperience.com:3000" />} />
       <Route path="*" element={<Navigate to="/" />} /> {/* Catch-all route */}
     </Routes>
   </Router>
