@@ -1,13 +1,13 @@
 .guitar-info {
+    width: 100%;
+    height: auto !important;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 100vw;
-    height: 100vh;
     background-color: aliceblue;
 }
-.guitar-icon {
+.guitar-pic {
     width: 100px; /* Set the desired width */
     /* border: 2px solid #a6a6b1; */
     border-radius: 50%;
@@ -52,4 +52,12 @@
 .guitar-info div form button {
     border-radius: 10px;
     align-self: center; /* Center the button within the form */
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  flex-direction: row;
 }

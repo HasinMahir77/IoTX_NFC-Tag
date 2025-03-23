@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'react-router-dom';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import AddGuitar from './components/AddGuitar';
+import GuitarApp from './components/GuitarApp';
 import ViewGuitar from './components/ViewGuitar';
 import './App.css';
+import placeholderGuitar from './assets/placeholderGuitar.png';
 
 const App = ({ server }) => {
   const [guitarExists, setGuitarExists] = useState(null);
@@ -39,22 +40,24 @@ const App = ({ server }) => {
   const nfcTagInt = new URLSearchParams(location.search).get('nfc');
 
   return (
-    <div className='mainApp'>
-      {guitarExists ? (
+    <div className='appView'>
+      {/* <div className='topBar'>
+        <img className='profileIcon' src={placeholderGuitar} alt="" />
+      </div> */}
+      {/* {guitarExists ? (
         <ViewGuitar server={server} tag_id={nfcTagInt} />
       ) : (
         <AddGuitar server={server} tag_id={nfcTagInt} />
-      )}
+      )} */}
+      <GuitarApp server={server} tag_id={nfcTagInt} guitarExists={guitarExists} />
     </div>
   );
 };
 
 const Home = () => (
-  <div className='mainDiv'>
+  <div className='homeDiv'>
     <h1 className='urlHeader'>Please use a valid URL or Add/View an instrument.</h1>
     <a href="http://nfc.iotexperience.com/nfc_tag?nfc=1">Example link</a>
-    
-
   </div>
 );
 
@@ -62,7 +65,7 @@ const MainApp = () => (
   <Router>
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/nfc_tag" element={<App server="http://127.0.0.1:3000" />} />
+      <Route path="/nfc_tag" element={<App server="http://192.168.0.137:3000" />} />
       <Route path="*" element={<Navigate to="/" />} /> {/* Catch-all route */}
     </Routes>
   </Router>

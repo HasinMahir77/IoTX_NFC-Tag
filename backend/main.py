@@ -1,12 +1,26 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-from models import db, Intrument  # Import Intrument instead of Guitar
+import os
 from config import Config
+from flask_cors import CORS
+from models import db, Intrument
+from werkzeug.utils import secure_filename
+from flask import Flask, request, jsonify, send_from_directory
+
+# Define the upload folder relative to the current file's directory
+UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), '..', 'userImages')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config.from_object(Config)
 CORS(app)  # Enable CORS
 db.init_app(app)
+
+# Ensure the upload folder exists
+if not os.path.exists(app.config['UPLOAD_FOLDER']):
+    os.makedirs(app.config['UPLOAD_FOLDER'])
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Create database tables (only needed for first-time setup)
 with app.app_context():
@@ -60,5 +74,28 @@ def delete_instrument(tag_id):
     db.session.commit()
     return jsonify({"message": "Instrument deleted successfully!"})
 
+@app.route('/upload_image/<int:tag_id>', methods=['POST'])
+def upload_image(tag_id):
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+    if file and allowed_file(file.filename):
+        filename = secure_filename(f"{tag_id}.jpg")
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        return jsonify({"message": "Image uploaded successfully!"}), 201
+    else:
+        return jsonify({"error": "File type not allowed"}), 400
+
+# Route to check if an image exists and return it
+@app.route('/check_image/<int:tag_id>', methods=['GET'])
+def check_image(tag_id):
+    filename = secure_filename(f"{tag_id}.jpg")
+    if os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], filename)):
+        return send_from_directory(app.config['UPLOAD_FOLDER'], filename, mimetype='image/jpeg')
+    else:
+        return jsonify({"exists": False}), 404
+
 if __name__ == '__main__':
-    app.run(port=3000, host="0.0.0.0", debug=True)
+    app.run(port=3000, host="0.0.0.0")
