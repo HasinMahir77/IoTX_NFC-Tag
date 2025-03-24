@@ -38,24 +38,18 @@ const App = ({ server }) => {
   const nfcTagInt = new URLSearchParams(location.search).get('nfc');
 
   return (
-    <div className='appView'>
-      {/* <div className='topBar'>
-        <img className='profileIcon' src={placeholderGuitar} alt="" />
-      </div> */}
-      {/* {guitarExists ? (
-        <ViewGuitar server={server} tag_id={nfcTagInt} />
-      ) : (
-        <AddGuitar server={server} tag_id={nfcTagInt} />
-      )} */}
+    <div className='mainApp'>
       <GuitarApp server={server} tag_id={nfcTagInt} guitarExists={guitarExists} />
     </div>
   );
 };
 
 const Home = () => (
-  <div className='homeDiv'>
+  <div className='mainDiv'>
     <h1 className='urlHeader'>Please use a valid URL or Add/View an instrument.</h1>
     <a href="http://nfc.iotexperience.com/nfc_tag?nfc=1">Example link</a>
+    
+
   </div>
 );
 
@@ -63,7 +57,7 @@ const MainApp = () => (
   <Router>
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/nfc_tag" element={<App server="nfc.iotexperience.com:3000" />} />
+      <Route path="/nfc_tag" element={<App server="http://127.0.0.1:3000" />} />
       <Route path="*" element={<Navigate to="/" />} /> {/* Catch-all route */}
     </Routes>
   </Router>

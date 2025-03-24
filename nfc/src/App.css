@@ -1,35 +1,17 @@
-.appView{
+.mainApp{
+  height: 100vh;
+  width: 100vw;
   align-items: center;
   justify-content: center;
   display: flex;
   flex-direction: column;
+}
+.mainDiv{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
   background-color: aliceblue;
-  width: 100vw;
-  height: auto;
-}
-.homeDiv{
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100vw;
-  height: fit-content;
-}
-.topBar{
-  width: 100vw;
-  display: flex;
-  flex-direction: row;
-  justify-content: end;
-}
-.profileIcon {
-  width: 8vh;
-  margin-top: 2vh;
-  margin-right: 2vw;
-  border-radius: 50%;
-  border: 1px solid rgb(155, 155, 155);
-  transition: filter 0.3s ease; /* Add transition for smooth effect */
-}
-
-.profileIcon:hover {
-  filter: brightness(0.85); /* Make the icon darker on hover */
+  height: 100vh;
 }
