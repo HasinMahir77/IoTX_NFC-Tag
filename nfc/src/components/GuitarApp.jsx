@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Form, Button, Modal } from 'react-bootstrap';
 import axios from 'axios';
+import heic2any from 'heic2any';
 import './GuitarApp.css'; // Import the CSS file
 import guitar_icon from '../assets/guitar_circle.png';
 
@@ -57,13 +58,24 @@ const GuitarApp = ({server, tag_id, guitarExists }) => {
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      setSelectedFile(file);
-      if (file.type === 'image/heic' || file.type === 'image/heif') {
+      const fileType = file.type;
+      const fileName = file.name;
+      const fileExtension = fileName.split('.').pop().toLowerCase();
+      console.log(`Selected file type: ${fileType}`);
+      console.log(`Selected file name: ${fileName}`);
+      console.log(`Selected file extension: ${fileExtension}`);
+      
+      if (fileType === 'image/heic' || fileType === 'image/heif' || fileExtension === 'heic' || fileExtension === 'heif') {
         try {
+          console.log('Converting HEIC image...');
           const convertedBlob = await heic2any({ blob: file, toType: 'image/jpeg' });
+          console.log('Converted Blob:', convertedBlob);
           const reader = new FileReader();
           reader.onloadend = () => {
             setImageUrl(reader.result);
+            const convertedFile = new File([convertedBlob], `${tag_id}.jpg`, { type: 'image/jpeg' });
+            setSelectedFile(convertedFile);
+            console.log('HEIC image converted and set:', convertedFile);
           };
           reader.readAsDataURL(convertedBlob);
         } catch (error) {
@@ -73,6 +85,8 @@ const GuitarApp = ({server, tag_id, guitarExists }) => {
         const reader = new FileReader();
         reader.onloadend = () => {
           setImageUrl(reader.result);
+          setSelectedFile(file);
+          console.log('Non-HEIC image selected and set:', file);
         };
         reader.readAsDataURL(file);
       }
@@ -123,8 +137,9 @@ const GuitarApp = ({server, tag_id, guitarExists }) => {
     if (selectedFile) {
       const formData = new FormData();
       formData.append('file', selectedFile);
+      console.log('Uploading file:', selectedFile);
       try {
-        await axios.post(`${server}/upload_image/${tag_id}`, formData, {
+        const response = await axios.post(`${server}/upload_image/${tag_id}`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
