@@ -7,7 +7,7 @@ from flask import Flask, request, jsonify, send_file
 
 # Define the upload folder relative to the current file's directory
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), '..', 'userImages')
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
