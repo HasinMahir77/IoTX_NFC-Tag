@@ -83,7 +83,7 @@ const GuitarApp = ({server, tag_id, guitarExists }) => {
       const response = await axios.get(`${server}/instrument/${tag_id}`);
       setGuitar(response.data);
     } catch (error) {
-      console.log('Error fetching guitar:', error);
+      console.error('Error fetching guitar:', error);
     }
   };
 

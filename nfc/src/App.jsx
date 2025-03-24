@@ -22,7 +22,7 @@ const App = ({ server }) => {
           if (error.response && error.response.status === 404) {
             setGuitarExists(false);
           } else {
-            console.log('Guitar not found');
+            console.error('Error checking guitar:', error);
           }
         }
       };
@@ -57,7 +57,7 @@ const MainApp = () => (
   <Router>
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/nfc_tag" element={<App server="nfc.iotexperience.com:3000" />} />
+      <Route path="/nfc_tag" element={<App server="http://127.0.0.1:3000" />} />
       <Route path="*" element={<Navigate to="/" />} /> {/* Catch-all route */}
     </Routes>
   </Router>
