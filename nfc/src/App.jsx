@@ -12,21 +12,28 @@ const App = ({ server }) => {
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     const nfcTagInt = queryParams.get('nfc');
-
+  
     if (nfcTagInt) {
       const checkGuitarExists = async () => {
         try {
-          const response = await axios.get(`${server}/instrument/${nfcTagInt}`);
-          setGuitarExists(true);
+          const response = await axios.get(`${server}/instrument_exists/${nfcTagInt}`);
+          if (response.data.exists) {
+            setGuitarExists(true);
+            console.log('Guitar exists:', response.data.exists);
+          } else {
+            setGuitarExists(false);
+            console.log('Guitar does not exist:', response.data.exists);
+          }
         } catch (error) {
           if (error.response && error.response.status === 404) {
             setGuitarExists(false);
+            console.log('Guitar does not exist:', error.response.status);
           } else {
             console.error('Error checking guitar:', error);
           }
         }
       };
-
+  
       checkGuitarExists();
     }
   }, [location.search, server]);
@@ -57,7 +64,7 @@ const MainApp = () => (
   <Router>
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/nfc_tag" element={<App server="199.250.210.176:3000" />} />
+      <Route path="/nfc_tag" element={<App server="http://192.168.0.137:3000" />} />
       <Route path="*" element={<Navigate to="/" />} /> {/* Catch-all route */}
     </Routes>
   </Router>

@@ -32,8 +32,9 @@ with app.app_context():
 def add_instrument():
     data = request.json
     print(data)
-    if not data or not all(k in data for k in ["tag_id", "name", "manufacturer", "model", "serial", "manufacture_date"]):
-        return jsonify({"error": "Invalid input"}), 400
+    required_fields = ["tag_id", "name", "manufacturer", "model", "serial", "manufacture_date"]
+    if not data or not all(k in data for k in required_fields):
+        return jsonify({"error": f"Missing fields: {', '.join([k for k in required_fields if k not in data])}"}), 400
 
     try:
         new_instrument = Intrument(
@@ -62,7 +63,7 @@ def get_instrument(tag_id):
     instrument = Intrument.query.get(tag_id)
     if not instrument:
         return jsonify({"error": "Instrument not found"}), 404
-    return jsonify(instrument.to_dict())
+    return jsonify(instrument.to_dict()), 200
 
 # Route to delete an instrument by tag_id
 @app.route('/delete_instrument/<int:tag_id>', methods=['DELETE'])
@@ -97,6 +98,15 @@ def check_image(tag_id):
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     if os.path.exists(filepath):
         return send_file(filepath, mimetype='image/jpeg')
+    else:
+        return jsonify({"exists": False}), 404
+    
+# Route to check if an instrument exists by tag_id
+@app.route('/instrument_exists/<int:tag_id>', methods=['GET'])
+def instrument_exists(tag_id):
+    instrument = Intrument.query.get(tag_id)
+    if instrument:
+        return jsonify({"exists": True}), 200
     else:
         return jsonify({"exists": False}), 404
 

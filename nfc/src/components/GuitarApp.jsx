@@ -25,8 +25,8 @@ const GuitarApp = ({server, tag_id, guitarExists }) => {
     name: '',
     manufacturer: '',
     model: '',
-    manufacture_year: '',
-    serial:''
+    manufacture_date: '',
+    serial: '',
   });
 
   const handleChange = (e) => {
@@ -124,12 +124,20 @@ const GuitarApp = ({server, tag_id, guitarExists }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('Submitting guitar input:', guitarInput); // Debugging payload
     try {
-      await axios.post(server+'/add_instrument', guitarInput);
+      await axios.post(`${server}/add_instrument`, guitarInput, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
       alert('Instrument added successfully!');
       window.location.reload(); // Refresh the page
     } catch (error) {
       console.error('Error adding Instrument:', error);
+      if (error.response) {
+        console.error('Response data:', error.response.data); // Log server response
+      }
       alert('Failed to add instrument.');
     }
   };
