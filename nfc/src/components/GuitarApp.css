@@ -18,6 +18,8 @@
 .guitar-info h2 {
     margin-bottom: 3vh;
     color: black;
+    position: relative;
+    top: 2vh;
 }
 .form-container {
     padding-top: 2vh;

@@ -166,7 +166,7 @@ const GuitarApp = ({server, tag_id, guitarExists }) => {
 
   return (
     <div className="guitar-info">
-      <h2>Add Instrument</h2>
+      {guitarExists===false ? <h2 className='myHeader'>Add Instrument</h2> : <h2 className='myHeader'>View Instrument</h2>}
       <img
         src={guitarImage || guitar_icon}
         alt="Guitar Icon"
