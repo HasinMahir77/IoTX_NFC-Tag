@@ -154,6 +154,7 @@ const GuitarApp = ({server, tag_id, guitarExists }) => {
         });
         alert('Image uploaded successfully!');
         setShowModal(false);
+        window.location.reload(); // Refresh the page
       } catch (error) {
         console.error('Error uploading image:', error);
         alert('Failed to upload image.');
