@@ -4,17 +4,10 @@ import axios from 'axios';
 import heic2any from 'heic2any';
 import './GuitarApp.css'; // Import the CSS file
 import guitar_icon from '../assets/guitar_circle.png';
-import getCroppedImg from './cropImage'; // Utility function to crop the image
-import Cropper from 'react-easy-crop';
 
 const GuitarApp = ({server, tag_id, guitarExists }) => {
   const [imageUrl, setImageUrl] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [showCropper, setShowCropper] = useState(false);
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
-  const [croppedImage, setCroppedImage] = useState(null);
   const fileInputRef = useRef(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [guitarImage, setGuitarImage] = useState(null);
@@ -50,7 +43,6 @@ const GuitarApp = ({server, tag_id, guitarExists }) => {
 
   const handleCloseModal = () => {
     setShowModal(false);
-    setShowCropper(false);
   };
 
   const handleCaptureClick = () => {
@@ -66,13 +58,38 @@ const GuitarApp = ({server, tag_id, guitarExists }) => {
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImageUrl(reader.result);
-        setShowCropper(true); // Show the cropper when an image is selected
-      };
-      reader.readAsDataURL(file);
-      setSelectedFile(file);
+      const fileType = file.type;
+      const fileName = file.name;
+      const fileExtension = fileName.split('.').pop().toLowerCase();
+      console.log(`Selected file type: ${fileType}`);
+      console.log(`Selected file name: ${fileName}`);
+      console.log(`Selected file extension: ${fileExtension}`);
+      
+      if (fileType === 'image/heic' || fileType === 'image/heif' || fileExtension === 'heic' || fileExtension === 'heif') {
+        try {
+          console.log('Converting HEIC image...');
+          const convertedBlob = await heic2any({ blob: file, toType: 'image/jpeg' });
+          console.log('Converted Blob:', convertedBlob);
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setImageUrl(reader.result);
+            const convertedFile = new File([convertedBlob], `${tag_id}.jpg`, { type: 'image/jpeg' });
+            setSelectedFile(convertedFile);
+            console.log('HEIC image converted and set:', convertedFile);
+          };
+          reader.readAsDataURL(convertedBlob);
+        } catch (error) {
+          console.error('Error converting HEIC image:', error);
+        }
+      } else {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImageUrl(reader.result);
+          setSelectedFile(file);
+          console.log('Non-HEIC image selected and set:', file);
+        };
+        reader.readAsDataURL(file);
+      }
     }
   };
   const fetchGuitar = async () => {
@@ -83,21 +100,6 @@ const GuitarApp = ({server, tag_id, guitarExists }) => {
       console.error('Error fetching guitar:', error);
     }
   };
-  const onCropComplete = (croppedArea, croppedAreaPixels) => {
-    setCroppedAreaPixels(croppedAreaPixels);
-  };
-
-  const handleCropSave = async () => {
-    try {
-      const croppedImage = await getCroppedImg(imageUrl, croppedAreaPixels);
-      setCroppedImage(croppedImage);
-      setShowCropper(false);
-      alert('Image cropped successfully!');
-    } catch (error) {
-      console.error('Error cropping image:', error);
-    }
-  };
-  
 
   const checkImage = async () => {
     try {
@@ -140,15 +142,15 @@ const GuitarApp = ({server, tag_id, guitarExists }) => {
     }
   };
   const handleImageSave = async () => {
-    if (croppedImage) {
+    if (selectedFile) {
       const formData = new FormData();
-      formData.append('file', croppedImage, `${tag_id}.png`);
-      console.log('Uploading cropped image:', croppedImage);
+      formData.append('file', selectedFile);
+      console.log('Uploading file:', selectedFile);
       try {
         const response = await axios.post(`${server}/upload_image/${tag_id}`, formData, {
           headers: {
-            'Content-Type': 'multipart/form-data',
-          },
+            'Content-Type': 'multipart/form-data'
+          }
         });
         alert('Image uploaded successfully!');
         setShowModal(false);
@@ -158,10 +160,9 @@ const GuitarApp = ({server, tag_id, guitarExists }) => {
         alert('Failed to upload image.');
       }
     } else {
-      alert('No cropped image available.');
+      alert('No image selected.');
     }
   };
-
 
   return (
     <div className="guitar-info">
@@ -293,50 +294,23 @@ const GuitarApp = ({server, tag_id, guitarExists }) => {
           <Modal.Title>Upload Photo</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {showCropper ? (
-            <div className="cropper-container">
-              <Cropper
-                image={imageUrl}
-                crop={crop}
-                zoom={zoom}
-                aspect={1}
-                cropShape="round"
-                showGrid={false}
-                onCropChange={setCrop}
-                onZoomChange={setZoom}
-                onCropComplete={onCropComplete}
-              />
-            </div>
+          {imageUrl ? (
+            <img src={imageUrl} alt="Uploaded" style={{ width: '100%' }} />
           ) : (
-            <div>
-              {imageUrl ? (
-                <img src={imageUrl} alt="Uploaded" style={{ width: '100%' }} />
-              ) : (
-                'Capture or upload a photo of your instrument.'
-              )}
-            </div>
+            'Capture or upload a photo of your instrument.'
           )}
         </Modal.Body>
         <Modal.Footer>
-        <div className="controls">
-                <input
-                  type="range"
-                  min={1}
-                  max={3}
-                  step={0.1}
-                  value={zoom}
-                  onChange={(e) => setZoom(e.target.value)}
-                />
-              </div>
-        <Button variant="success" onClick={handleCropSave}>
-                Save Cropped Image
-              </Button>
-          <Button variant="primary" onClick={() => fileInputRef.current.click()}>
+          <Button variant="primary" onClick={handleCaptureClick}>
+            Capture
+          </Button>
+          <Button variant="primary" onClick={handleUploadClick}>
             Upload
           </Button>
           <input
             type="file"
             accept="image/*"
+            capture="environment"
             ref={fileInputRef}
             style={{ display: 'none' }}
             onChange={handleFileChange}
