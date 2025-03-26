@@ -140,33 +140,25 @@ const GuitarApp = ({server, tag_id, guitarExists }) => {
     }
   };
   const handleImageSave = async () => {
-    if (imageUrl && croppedAreaPixels) {
+    if (croppedImage) {
+      const formData = new FormData();
+      formData.append('file', croppedImage, `${tag_id}.png`);
+      console.log('Uploading cropped image:', croppedImage);
       try {
-        // Crop the image first
-        const croppedImage = await getCroppedImg(imageUrl, croppedAreaPixels);
-        setCroppedImage(croppedImage);
-  
-        // Prepare the cropped image for upload
-        const formData = new FormData();
-        formData.append('file', croppedImage, `${tag_id}.png`);
-        console.log('Uploading cropped image:', croppedImage);
-  
-        // Upload the cropped image
         const response = await axios.post(`${server}/upload_image/${tag_id}`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
         });
-  
         alert('Image uploaded successfully!');
         setShowModal(false);
         window.location.reload(); // Refresh the page
       } catch (error) {
-        console.error('Error cropping or uploading image:', error);
+        console.error('Error uploading image:', error);
         alert('Failed to upload image.');
       }
     } else {
-      alert('No image selected or cropped area is not defined.');
+      alert('No cropped image available.');
     }
   };
 
@@ -301,26 +293,32 @@ const GuitarApp = ({server, tag_id, guitarExists }) => {
           <Modal.Title>Upload Photo</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {imageUrl ? (
-                <div className="cropper-container">
-                <Cropper
-                  image={imageUrl}
-                  crop={crop}
-                  zoom={zoom}
-                  aspect={1}
-                  cropShape="round"
-                  showGrid={false}
-                  onCropChange={setCrop}
-                  onZoomChange={setZoom}
-                  onCropComplete={onCropComplete}
-                />
-              </div>
+          {showCropper ? (
+            <div className="cropper-container">
+              <Cropper
+                image={imageUrl}
+                crop={crop}
+                zoom={zoom}
+                aspect={1}
+                cropShape="round"
+                showGrid={false}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={onCropComplete}
+              />
+            </div>
+          ) : (
+            <div>
+              {imageUrl ? (
+                <img src={imageUrl} alt="Uploaded" style={{ width: '100%' }} />
               ) : (
                 'Capture or upload a photo of your instrument.'
               )}
+            </div>
+          )}
         </Modal.Body>
         <Modal.Footer>
-        {imageUrl? <div className="controls">
+        <div className="controls">
                 <input
                   type="range"
                   min={1}
@@ -329,10 +327,10 @@ const GuitarApp = ({server, tag_id, guitarExists }) => {
                   value={zoom}
                   onChange={(e) => setZoom(e.target.value)}
                 />
-        </div>: <></>}
-        {/* <Button variant="success" onClick={handleCropSave}>
+              </div>
+        <Button variant="success" onClick={handleCropSave}>
                 Save Cropped Image
-              </Button> */}
+              </Button>
           <Button variant="primary" onClick={() => fileInputRef.current.click()}>
             Upload
           </Button>
