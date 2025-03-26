@@ -333,6 +333,9 @@ const GuitarApp = ({server, tag_id, guitarExists }) => {
         {/* <Button variant="success" onClick={handleCropSave}>
                 Save Cropped Image
               </Button> */}
+          <Button variant="primary" onClick={handleCaptureClick}>
+            Capture
+          </Button>
           <Button variant="primary" onClick={() => fileInputRef.current.click()}>
             Upload
           </Button>
