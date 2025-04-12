@@ -5,7 +5,7 @@ import cv2
 reader = easyocr.Reader(['en'])
 
 # Read text from image
-text = reader.readtext('guitar1.jpg', detail=0)  # detail=0 for plain text
+text = reader.readtext('marqlabel.jpg', detail=0)  # detail=0 for plain text
 
 print("Extracted Text:")
 print("\n".join(text))
