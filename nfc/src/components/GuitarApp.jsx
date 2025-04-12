@@ -301,10 +301,23 @@ const GuitarApp = ({server, tag_id, guitarExists }) => {
           )}
         </Modal.Body>
         <Modal.Footer>
+        {imageUrl? <div className="controls">
+                <input
+                  type="range"
+                  min={1}
+                  max={3}
+                  step={0.1}
+                  value={zoom}
+                  onChange={(e) => setZoom(e.target.value)}
+                />
+        </div>: <></>}
+        {/* <Button variant="success" onClick={handleCropSave}>
+                Save Cropped Image
+              </Button> */}
           <Button variant="primary" onClick={handleCaptureClick}>
             Capture
           </Button>
-          <Button variant="primary" onClick={handleUploadClick}>
+          <Button variant="primary" onClick={() => fileInputRef.current.click()}>
             Upload
           </Button>
           <input
