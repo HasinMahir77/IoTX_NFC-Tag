@@ -1,7 +1,7 @@
 import os
 from config import Config
 from flask_cors import CORS
-from models import db, Intrument
+from models import db, Instrument, Storage
 from werkzeug.utils import secure_filename
 from flask import Flask, request, jsonify, send_file
 
@@ -25,7 +25,18 @@ def allowed_file(filename):
 
 # Create database tables (only needed for first-time setup)
 with app.app_context():
-    db.create_all()
+    db.create_all()  # Ensure tables are created
+
+    # Check if "Storage 1" and "Storage 2" exist, and create them if not
+    if not Storage.query.filter_by(name="Storage 1").first():
+        storage1 = Storage(name="Storage 1", address="123 Dummy Street")
+        db.session.add(storage1)
+
+    if not Storage.query.filter_by(name="Storage 2").first():
+        storage2 = Storage(name="Storage 2", address="456 Dummy Avenue")
+        db.session.add(storage2)
+
+    db.session.commit()  # Commit changes to the database
 
 # Route to add a new instrument
 @app.route('/add_instrument', methods=['POST'])
@@ -37,7 +48,7 @@ def add_instrument():
         return jsonify({"error": f"Missing fields: {', '.join([k for k in required_fields if k not in data])}"}), 400
 
     try:
-        new_instrument = Intrument(
+        new_instrument = Instrument(
             tag_id=int(data['tag_id']),
             name=data['name'],
             manufacturer=data['manufacturer'],
@@ -54,13 +65,13 @@ def add_instrument():
 # Route to get all instruments
 @app.route('/instruments', methods=['GET'])
 def get_instruments():
-    instruments = Intrument.query.all()
+    instruments = Instrument.query.all()
     return jsonify([instrument.to_dict() for instrument in instruments])
 
 # Route to get an instrument by tag_id
 @app.route('/instrument/<int:tag_id>', methods=['GET'])
 def get_instrument(tag_id):
-    instrument = Intrument.query.get(tag_id)
+    instrument = Instrument.query.get(tag_id)
     if not instrument:
         return jsonify({"error": "Instrument not found"}), 404
     return jsonify(instrument.to_dict()), 200
@@ -68,7 +79,7 @@ def get_instrument(tag_id):
 # Route to delete an instrument by tag_id
 @app.route('/delete_instrument/<int:tag_id>', methods=['DELETE'])
 def delete_instrument(tag_id):
-    instrument = Intrument.query.get(tag_id)
+    instrument = Instrument.query.get(tag_id)
     if not instrument:
         return jsonify({"error": "Instrument not found"}), 404
 
@@ -104,11 +115,32 @@ def check_image(tag_id):
 # Route to check if an instrument exists by tag_id
 @app.route('/instrument_exists/<int:tag_id>', methods=['GET'])
 def instrument_exists(tag_id):
-    instrument = Intrument.query.get(tag_id)
+    instrument = Instrument.query.get(tag_id)
     if instrument:
         return jsonify({"exists": True}), 200
     else:
         return jsonify({"exists": False}), 404
+    
+# Route to update the storage of an instrument
+@app.route('/update_storage/<int:tag_id>', methods=['PUT'])
+def update_instrument_storage(tag_id):
+    data = request.json
+    if not data or 'storage_id' not in data:
+        return jsonify({"error": "Missing 'storage_id' in request body"}), 400
+
+    instrument = Instrument.query.get(tag_id)
+    if not instrument:
+        return jsonify({"error": "Instrument not found"}), 404
+
+    storage = Storage.query.get(data['storage_id'])
+    if not storage and data['storage_id'] is not None:
+        return jsonify({"error": "Storage not found"}), 404
+
+    # Update the storage of the instrument
+    instrument.storage = storage
+    db.session.commit()
+
+    return jsonify({"message": "Instrument storage updated successfully!", "instrument": instrument.to_dict()}), 200
 
 
 if __name__ == '__main__':
