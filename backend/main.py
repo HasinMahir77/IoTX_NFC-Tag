@@ -39,7 +39,7 @@ with app.app_context():
     db.session.commit()  # Commit changes to the database
 
 # Route to add a new instrument
-@app.route('/add_instrument', methods=['POST'])
+@app.route('/nfc/add_instrument', methods=['POST'])
 def add_instrument():
     data = request.json
     print(data)
@@ -63,13 +63,13 @@ def add_instrument():
         return jsonify({"error": "Invalid manufacture_date format"}), 407
 
 # Route to get all instruments
-@app.route('/instruments', methods=['GET'])
+@app.route('/nfc/instruments', methods=['GET'])
 def get_instruments():
     instruments = Instrument.query.all()
     return jsonify([instrument.to_dict() for instrument in instruments])
 
 # Route to get an instrument by tag_id
-@app.route('/instrument/<int:tag_id>', methods=['GET'])
+@app.route('/nfc/instrument/<int:tag_id>', methods=['GET'])
 def get_instrument(tag_id):
     instrument = Instrument.query.get(tag_id)
     if not instrument:
@@ -77,7 +77,7 @@ def get_instrument(tag_id):
     return jsonify(instrument.to_dict()), 200
 
 # Route to delete an instrument by tag_id
-@app.route('/delete_instrument/<int:tag_id>', methods=['DELETE'])
+@app.route('/nfc/delete_instrument/<int:tag_id>', methods=['DELETE'])
 def delete_instrument(tag_id):
     instrument = Instrument.query.get(tag_id)
     if not instrument:
@@ -88,7 +88,7 @@ def delete_instrument(tag_id):
     return jsonify({"message": "Instrument deleted successfully!"})
 
 # Route to upload an image for an instrument
-@app.route('/upload_image/<int:tag_id>', methods=['POST'])
+@app.route('/nfc/upload_image/<int:tag_id>', methods=['POST'])
 def upload_image(tag_id):
     if 'file' not in request.files:
         return jsonify({"error": "No file part"}), 400
@@ -103,7 +103,7 @@ def upload_image(tag_id):
         return jsonify({"error": "File type not allowed"}), 400
     
 # Route to check if an image exists and return it
-@app.route('/check_image/<int:tag_id>', methods=['GET'])
+@app.route('/nfc/check_image/<int:tag_id>', methods=['GET'])
 def check_image(tag_id):
     filename = secure_filename(f"{tag_id}.jpg")
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
@@ -113,7 +113,7 @@ def check_image(tag_id):
         return jsonify({"exists": False}), 404
     
 # Route to check if an instrument exists by tag_id
-@app.route('/instrument_exists/<int:tag_id>', methods=['GET'])
+@app.route('/nfc/instrument_exists/<int:tag_id>', methods=['GET'])
 def instrument_exists(tag_id):
     instrument = Instrument.query.get(tag_id)
     if instrument:
@@ -122,7 +122,7 @@ def instrument_exists(tag_id):
         return jsonify({"exists": False}), 404
     
 # Route to update the storage of an instrument
-@app.route('/update_storage/<int:tag_id>', methods=['PUT'])
+@app.route('/nfc/update_storage/<int:tag_id>', methods=['PUT'])
 def update_instrument_storage(tag_id):
     data = request.json
     if not data or 'storage_id' not in data:
