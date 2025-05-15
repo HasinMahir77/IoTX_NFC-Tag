@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Form, Button, Modal } from 'react-bootstrap';
+import { Form, Button, Modal, Alert, Spinner } from 'react-bootstrap';
 import axios from 'axios';
 import heic2any from 'heic2any';
 import './GuitarApp.css'; // Import the CSS file
@@ -18,6 +18,8 @@ const GuitarApp = ({server, tag_id, guitarExists }) => {
   const fileInputRef = useRef(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [guitarImage, setGuitarImage] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const [guitar, setGuitar] = useState({
     tag_id: tag_id,
@@ -27,21 +29,11 @@ const GuitarApp = ({server, tag_id, guitarExists }) => {
     serial: '',
     manufacture_date: ''
   });
-  const [guitarInput, setGuitarInput] = useState({
-    tag_id: tag_id,
-    name: '',
-    manufacturer: '',
-    model: '',
-    manufacture_date: '',
-    serial: '',
-  });
+  const [serialInput, setSerialInput] = useState('');
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setGuitarInput((prevGuitar) => ({
-      ...prevGuitar,
-      [name]: value
-    }));
+  const handleSerialChange = (e) => {
+    setSerialInput(e.target.value);
+    if (error) setError(null); // Clear any previous errors
   };
 
   const handleImageClick = () => {
@@ -75,14 +67,16 @@ const GuitarApp = ({server, tag_id, guitarExists }) => {
       setSelectedFile(file);
     }
   };
+  
   const fetchGuitar = async () => {
     try {
-      const response = await axios.get(`${server}/instrument/${tag_id}`);
+      const response = await axios.get(`${server}/instrument_by_tag/${tag_id}`);
       setGuitar(response.data);
     } catch (error) {
       console.error('Error fetching guitar:', error);
     }
   };
+  
   const onCropComplete = (croppedArea, croppedAreaPixels) => {
     setCroppedAreaPixels(croppedAreaPixels);
   };
@@ -98,7 +92,6 @@ const GuitarApp = ({server, tag_id, guitarExists }) => {
     }
   };
   
-
   const checkImage = async () => {
     try {
       const response = await axios.get(`${server}/check_image/${tag_id}`, { responseType: 'blob' });
@@ -115,30 +108,50 @@ const GuitarApp = ({server, tag_id, guitarExists }) => {
       }
     }
   };
+  
   useEffect(() => {
-    fetchGuitar();
-    checkImage();
-  }, [server, tag_id]);
+    if (guitarExists) {
+      fetchGuitar();
+      checkImage();
+    }
+  }, [server, tag_id, guitarExists]);
 
-  const handleSubmit = async (e) => {
+  const handlePairSubmit = async (e) => {
     e.preventDefault();
-    console.log('Submitting guitar input:', guitarInput); // Debugging payload
+    
+    if (!serialInput.trim()) {
+      setError('Please enter a serial number');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    
     try {
-      await axios.post(`${server}/add_instrument`, guitarInput, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      // Call the new pair_by_serial endpoint
+      const response = await axios.post(`${server}/pair_by_serial`, {
+        tag_id: tag_id,
+        serial: serialInput.trim()
       });
-      alert('Instrument added successfully!');
-      window.location.reload(); // Refresh the page
-    } catch (error) {
-      console.error('Error adding Instrument:', error);
-      if (error.response) {
-        console.error('Response data:', error.response.data); // Log server response
+      
+      if (response.status === 200) {
+        alert('Instrument paired successfully!');
+        window.location.reload(); // Refresh the page to show the paired instrument
       }
-      alert('Failed to add instrument.');
+    } catch (error) {
+      console.error('Error pairing instrument:', error);
+      if (error.response && error.response.data && error.response.data.message) {
+        setError(error.response.data.message);
+      } else if (error.response && error.response.status === 404) {
+        setError('No instrument found with this serial number. Please check and try again.');
+      } else {
+        setError('Failed to pair the instrument. Please try again.');
+      }
+    } finally {
+      setLoading(false);
     }
   };
+  
   const handleImageSave = async () => {
     if (imageUrl && croppedAreaPixels) {
       try {
@@ -173,7 +186,7 @@ const GuitarApp = ({server, tag_id, guitarExists }) => {
 
   return (
     <div className="guitar-info">
-      {guitarExists===false ? <h2 className='myHeader'>Add Instrument</h2> : <h2 className='myHeader'>View Instrument</h2>}
+      {guitarExists===false ? <h2 className='myHeader'>Pair Instrument</h2> : <h2 className='myHeader'>View Instrument</h2>}
       <img
         src={guitarImage || guitar_icon}
         alt="Guitar Icon"
@@ -182,67 +195,34 @@ const GuitarApp = ({server, tag_id, guitarExists }) => {
       />
       <div className='form-container'>
         {guitarExists===false ? 
-              <Form onSubmit={handleSubmit}>
+              <Form onSubmit={handlePairSubmit}>
               <Form.Group className="mb-3" controlId="formTagId">
                 <Form.Label>Tag ID</Form.Label>
-                <Form.Control type="text" value={guitarInput.tag_id} readOnly disabled />
+                <Form.Control type="text" value={tag_id} readOnly disabled />
               </Form.Group>
       
-              <Form.Group className="mb-3" controlId="formGuitarName">
-                <Form.Label>Name</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="Enter guitar name"
-                  name="name"
-                  value={guitarInput.name}
-                  onChange={handleChange}
-                />
-              </Form.Group>
-              <Form.Group className="mb-3" controlId="formGuitarManufacturer">
-                <Form.Label>Manufacturer</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="Manufacturer"
-                  name="manufacturer"
-                  value={guitarInput.manufacturer}
-                  onChange={handleChange}
-                />
-              </Form.Group>
-      
-              <Form.Group className="mb-3" controlId="formGuitarModel">
-                <Form.Label>Model</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="Enter guitar model"
-                  name="model"
-                  value={guitarInput.model}
-                  onChange={handleChange}
-                />
-              </Form.Group>
-              <Form.Group className="mb-3" controlId="formGuitarModel">
-                <Form.Label>Serial No.</Form.Label>
+              {error && <Alert variant="danger">{error}</Alert>}
+              
+              <Form.Group className="mb-3" controlId="formGuitarSerial">
+                <Form.Label>Serial Number</Form.Label>
                 <Form.Control
                   type="text"
                   placeholder="Enter serial"
-                  name="serial"
-                  value={guitarInput.serial}
-                  onChange={handleChange}
+                  value={serialInput}
+                  onChange={handleSerialChange}
+                  disabled={loading}
                 />
               </Form.Group>
       
-              <Form.Group className="mb-3" controlId="formManufactureYear">
-                <Form.Label>Manufacture Date</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="Enter manufacture date"
-                  name="manufacture_date"
-                  value={guitarInput.manufacture_date}
-                  onChange={handleChange}
-                />
-              </Form.Group>
-      
-              <Button variant="primary" type="submit">
-                Save
+              <Button variant="primary" type="submit" disabled={loading}>
+                {loading ? (
+                  <>
+                    <Spinner animation="border" size="sm" className="me-2" />
+                    Pairing...
+                  </>
+                ) : (
+                  'Pair Instrument'
+                )}
               </Button>
             </Form>:
             <Form>

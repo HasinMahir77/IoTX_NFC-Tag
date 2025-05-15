@@ -3,7 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 class Instrument(db.Model):  # Corrected typo in class name
-    tag_id = db.Column(db.Integer, primary_key=True)  
+    dbid = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    tag_id = db.Column(db.Integer, nullable=True)  
     name = db.Column(db.String(30), nullable=False)
     manufacturer = db.Column(db.String(30), nullable=False)
     model = db.Column(db.String(30), nullable=False)
@@ -13,6 +14,7 @@ class Instrument(db.Model):  # Corrected typo in class name
 
     def to_dict(self):
         return {
+            "dbid": self.dbid,
             "tag_id": self.tag_id,
             "name": self.name,
             "manufacturer": self.manufacturer,
