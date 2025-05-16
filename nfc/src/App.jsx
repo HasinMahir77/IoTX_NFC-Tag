@@ -5,6 +5,9 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import GuitarApp from './components/GuitarApp';
 import './App.css';
 
+// Define server URL outside components
+const SERVER_URL = "http://localhost:7100";
+
 const App = ({ server }) => {
   const [guitarExists, setGuitarExists] = useState(null);
   const location = useLocation();
@@ -17,24 +20,16 @@ const App = ({ server }) => {
       const checkGuitarExists = async () => {
         try {
           const response = await axios.get(`${server}/instrument_exists/${nfcTagInt}`);
-          if (response.data.exists) {
-            setGuitarExists(true);
-            console.log('Guitar exists:', response.data.exists);
-          } else {
-            setGuitarExists(false);
-            console.log('Guitar does not exist:', response.data.exists);
-          }
+          setGuitarExists(response.data.exists);
         } catch (error) {
-          if (error.response && error.response.status === 404) {
-            setGuitarExists(false);
-            console.log('Guitar does not exist:', error.response.status);
-          } else {
-            console.error('Error checking guitar:', error);
-          }
+          console.error('Error checking instrument:', error);
+          // Set to false on error to allow adding new instruments
+          setGuitarExists(false);
         }
       };
-  
       checkGuitarExists();
+    } else {
+      setGuitarExists(false);
     }
   }, [location.search, server]);
 
@@ -43,7 +38,6 @@ const App = ({ server }) => {
   }
 
   const nfcTagInt = new URLSearchParams(location.search).get('nfc');
-
   return (
     <div className='mainApp'>
       <GuitarApp server={server} tag_id={nfcTagInt} guitarExists={guitarExists} />
@@ -54,7 +48,7 @@ const App = ({ server }) => {
 const Home = () => (
   <div className='mainDiv'>
     <h1 className='urlHeader'>Please use a valid URL or Add/View an instrument.</h1>
-    <a href="http://nfc.iotexperience.com/nfc_tag?nfc=1">Example link</a>
+    <a href={`${SERVER_URL.replace('7100', '5173')}/nfc_tag?nfc=1`}>Example link</a>
   </div>
 );
 
@@ -62,8 +56,8 @@ const MainApp = () => (
   <Router>
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/nfc_tag" element={<App server="http://localhost:5001/nfc" />} />
-      <Route path="*" element={<Navigate to="/" />} /> {/* Catch-all route */}
+      <Route path="/nfc_tag" element={<App server={`${SERVER_URL}/nfc`} />} />
+      <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   </Router>
 );
