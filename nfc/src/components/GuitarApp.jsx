@@ -1,16 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Form, Button, Modal } from 'react-bootstrap';
+import { Form, Button, Modal, Alert, Spinner } from 'react-bootstrap';
 import axios from 'axios';
 import heic2any from 'heic2any';
 import './GuitarApp.css'; // Import the CSS file
 import guitar_icon from '../assets/guitar_circle.png';
+import getCroppedImg from './cropImage'; // Utility function to crop the image
+import Cropper from 'react-easy-crop';
 
 const GuitarApp = ({server, tag_id, guitarExists }) => {
   const [imageUrl, setImageUrl] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showCropper, setShowCropper] = useState(false);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+  const [croppedImage, setCroppedImage] = useState(null);
   const fileInputRef = useRef(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [guitarImage, setGuitarImage] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const [guitar, setGuitar] = useState({
     tag_id: tag_id,
@@ -20,21 +29,11 @@ const GuitarApp = ({server, tag_id, guitarExists }) => {
     serial: '',
     manufacture_date: ''
   });
-  const [guitarInput, setGuitarInput] = useState({
-    tag_id: tag_id,
-    name: '',
-    manufacturer: '',
-    model: '',
-    manufacture_date: '',
-    serial: '',
-  });
+  const [serialInput, setSerialInput] = useState('');
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setGuitarInput((prevGuitar) => ({
-      ...prevGuitar,
-      [name]: value
-    }));
+  const handleSerialChange = (e) => {
+    setSerialInput(e.target.value);
+    if (error) setError(null); // Clear any previous errors
   };
 
   const handleImageClick = () => {
@@ -43,6 +42,7 @@ const GuitarApp = ({server, tag_id, guitarExists }) => {
 
   const handleCloseModal = () => {
     setShowModal(false);
+    setShowCropper(false);
   };
 
   const handleCaptureClick = () => {
@@ -58,49 +58,40 @@ const GuitarApp = ({server, tag_id, guitarExists }) => {
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const fileType = file.type;
-      const fileName = file.name;
-      const fileExtension = fileName.split('.').pop().toLowerCase();
-      console.log(`Selected file type: ${fileType}`);
-      console.log(`Selected file name: ${fileName}`);
-      console.log(`Selected file extension: ${fileExtension}`);
-      
-      if (fileType === 'image/heic' || fileType === 'image/heif' || fileExtension === 'heic' || fileExtension === 'heif') {
-        try {
-          console.log('Converting HEIC image...');
-          const convertedBlob = await heic2any({ blob: file, toType: 'image/jpeg' });
-          console.log('Converted Blob:', convertedBlob);
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            setImageUrl(reader.result);
-            const convertedFile = new File([convertedBlob], `${tag_id}.jpg`, { type: 'image/jpeg' });
-            setSelectedFile(convertedFile);
-            console.log('HEIC image converted and set:', convertedFile);
-          };
-          reader.readAsDataURL(convertedBlob);
-        } catch (error) {
-          console.error('Error converting HEIC image:', error);
-        }
-      } else {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setImageUrl(reader.result);
-          setSelectedFile(file);
-          console.log('Non-HEIC image selected and set:', file);
-        };
-        reader.readAsDataURL(file);
-      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImageUrl(reader.result);
+        setShowCropper(true); // Show the cropper when an image is selected
+      };
+      reader.readAsDataURL(file);
+      setSelectedFile(file);
     }
   };
+  
   const fetchGuitar = async () => {
     try {
-      const response = await axios.get(`${server}/instrument/${tag_id}`);
+      const response = await axios.get(`${server}/instrument_by_tag/${tag_id}`);
       setGuitar(response.data);
     } catch (error) {
       console.error('Error fetching guitar:', error);
     }
   };
+  
+  const onCropComplete = (croppedArea, croppedAreaPixels) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  };
 
+  const handleCropSave = async () => {
+    try {
+      const croppedImage = await getCroppedImg(imageUrl, croppedAreaPixels);
+      setCroppedImage(croppedImage);
+      setShowCropper(false);
+      alert('Image cropped successfully!');
+    } catch (error) {
+      console.error('Error cropping image:', error);
+    }
+  };
+  
   const checkImage = async () => {
     try {
       const response = await axios.get(`${server}/check_image/${tag_id}`, { responseType: 'blob' });
@@ -117,56 +108,85 @@ const GuitarApp = ({server, tag_id, guitarExists }) => {
       }
     }
   };
+  
   useEffect(() => {
-    fetchGuitar();
-    checkImage();
-  }, [server, tag_id]);
+    if (guitarExists) {
+      fetchGuitar();
+      checkImage();
+    }
+  }, [server, tag_id, guitarExists]);
 
-  const handleSubmit = async (e) => {
+  const handlePairSubmit = async (e) => {
     e.preventDefault();
-    console.log('Submitting guitar input:', guitarInput); // Debugging payload
+    
+    if (!serialInput.trim()) {
+      setError('Please enter a serial number');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    
     try {
-      await axios.post(`${server}/add_instrument`, guitarInput, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      // Call the new pair_by_serial endpoint
+      const response = await axios.post(`${server}/pair_by_serial`, {
+        tag_id: tag_id,
+        serial: serialInput.trim()
       });
-      alert('Instrument added successfully!');
-      window.location.reload(); // Refresh the page
-    } catch (error) {
-      console.error('Error adding Instrument:', error);
-      if (error.response) {
-        console.error('Response data:', error.response.data); // Log server response
+      
+      if (response.status === 200) {
+        alert('Instrument paired successfully!');
+        window.location.reload(); // Refresh the page to show the paired instrument
       }
-      alert('Failed to add instrument.');
+    } catch (error) {
+      console.error('Error pairing instrument:', error);
+      if (error.response && error.response.data && error.response.data.message) {
+        setError(error.response.data.message);
+      } else if (error.response && error.response.status === 404) {
+        setError('No instrument found with this serial number. Please check and try again.');
+      } else {
+        setError('Failed to pair the instrument. Please try again.');
+      }
+    } finally {
+      setLoading(false);
     }
   };
+  
   const handleImageSave = async () => {
-    if (selectedFile) {
-      const formData = new FormData();
-      formData.append('file', selectedFile);
-      console.log('Uploading file:', selectedFile);
+    if (imageUrl && croppedAreaPixels) {
       try {
+        // Crop the image first
+        const croppedImage = await getCroppedImg(imageUrl, croppedAreaPixels);
+        setCroppedImage(croppedImage);
+  
+        // Prepare the cropped image for upload
+        const formData = new FormData();
+        formData.append('file', croppedImage, `${tag_id}.png`);
+        console.log('Uploading cropped image:', croppedImage);
+  
+        // Upload the cropped image
         const response = await axios.post(`${server}/upload_image/${tag_id}`, formData, {
           headers: {
-            'Content-Type': 'multipart/form-data'
-          }
+            'Content-Type': 'multipart/form-data',
+          },
         });
+  
         alert('Image uploaded successfully!');
         setShowModal(false);
         window.location.reload(); // Refresh the page
       } catch (error) {
-        console.error('Error uploading image:', error);
+        console.error('Error cropping or uploading image:', error);
         alert('Failed to upload image.');
       }
     } else {
-      alert('No image selected.');
+      alert('No image selected or cropped area is not defined.');
     }
   };
 
+
   return (
     <div className="guitar-info">
-      {guitarExists===false ? <h2 className='myHeader'>Add Instrument</h2> : <h2 className='myHeader'>View Instrument</h2>}
+      {guitarExists===false ? <h2 className='myHeader'>Pair Instrument</h2> : <h2 className='myHeader'>View Instrument</h2>}
       <img
         src={guitarImage || guitar_icon}
         alt="Guitar Icon"
@@ -175,67 +195,34 @@ const GuitarApp = ({server, tag_id, guitarExists }) => {
       />
       <div className='form-container'>
         {guitarExists===false ? 
-              <Form onSubmit={handleSubmit}>
+              <Form onSubmit={handlePairSubmit}>
               <Form.Group className="mb-3" controlId="formTagId">
                 <Form.Label>Tag ID</Form.Label>
-                <Form.Control type="text" value={guitarInput.tag_id} readOnly disabled />
+                <Form.Control type="text" value={tag_id} readOnly disabled />
               </Form.Group>
       
-              <Form.Group className="mb-3" controlId="formGuitarName">
-                <Form.Label>Name</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="Enter guitar name"
-                  name="name"
-                  value={guitarInput.name}
-                  onChange={handleChange}
-                />
-              </Form.Group>
-              <Form.Group className="mb-3" controlId="formGuitarManufacturer">
-                <Form.Label>Manufacturer</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="Manufacturer"
-                  name="manufacturer"
-                  value={guitarInput.manufacturer}
-                  onChange={handleChange}
-                />
-              </Form.Group>
-      
-              <Form.Group className="mb-3" controlId="formGuitarModel">
-                <Form.Label>Model</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="Enter guitar model"
-                  name="model"
-                  value={guitarInput.model}
-                  onChange={handleChange}
-                />
-              </Form.Group>
-              <Form.Group className="mb-3" controlId="formGuitarModel">
-                <Form.Label>Serial No.</Form.Label>
+              {error && <Alert variant="danger">{error}</Alert>}
+              
+              <Form.Group className="mb-3" controlId="formGuitarSerial">
+                <Form.Label>Serial Number</Form.Label>
                 <Form.Control
                   type="text"
                   placeholder="Enter serial"
-                  name="serial"
-                  value={guitarInput.serial}
-                  onChange={handleChange}
+                  value={serialInput}
+                  onChange={handleSerialChange}
+                  disabled={loading}
                 />
               </Form.Group>
       
-              <Form.Group className="mb-3" controlId="formManufactureYear">
-                <Form.Label>Manufacture Date</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="Enter manufacture date"
-                  name="manufacture_date"
-                  value={guitarInput.manufacture_date}
-                  onChange={handleChange}
-                />
-              </Form.Group>
-      
-              <Button variant="primary" type="submit">
-                Save
+              <Button variant="primary" type="submit" disabled={loading}>
+                {loading ? (
+                  <>
+                    <Spinner animation="border" size="sm" className="me-2" />
+                    Pairing...
+                  </>
+                ) : (
+                  'Pair Instrument'
+                )}
               </Button>
             </Form>:
             <Form>
@@ -295,22 +282,46 @@ const GuitarApp = ({server, tag_id, guitarExists }) => {
         </Modal.Header>
         <Modal.Body>
           {imageUrl ? (
-            <img src={imageUrl} alt="Uploaded" style={{ width: '100%' }} />
-          ) : (
-            'Capture or upload a photo of your instrument.'
-          )}
+                <div className="cropper-container">
+                <Cropper
+                  image={imageUrl}
+                  crop={crop}
+                  zoom={zoom}
+                  aspect={1}
+                  cropShape="round"
+                  showGrid={false}
+                  onCropChange={setCrop}
+                  onZoomChange={setZoom}
+                  onCropComplete={onCropComplete}
+                />
+              </div>
+              ) : (
+                'Capture or upload a photo of your instrument.'
+              )}
         </Modal.Body>
         <Modal.Footer>
+        {imageUrl? <div className="controls">
+                <input
+                  type="range"
+                  min={1}
+                  max={3}
+                  step={0.1}
+                  value={zoom}
+                  onChange={(e) => setZoom(e.target.value)}
+                />
+        </div>: <></>}
+        {/* <Button variant="success" onClick={handleCropSave}>
+                Save Cropped Image
+              </Button> */}
           <Button variant="primary" onClick={handleCaptureClick}>
             Capture
           </Button>
-          <Button variant="primary" onClick={handleUploadClick}>
+          <Button variant="primary" onClick={() => fileInputRef.current.click()}>
             Upload
           </Button>
           <input
             type="file"
             accept="image/*"
-            capture="environment"
             ref={fileInputRef}
             style={{ display: 'none' }}
             onChange={handleFileChange}

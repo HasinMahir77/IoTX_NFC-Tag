@@ -55,8 +55,6 @@ const Home = () => (
   <div className='mainDiv'>
     <h1 className='urlHeader'>Please use a valid URL or Add/View an instrument.</h1>
     <a href="http://nfc.iotexperience.com/nfc_tag?nfc=1">Example link</a>
-    
-
   </div>
 );
 
@@ -64,7 +62,7 @@ const MainApp = () => (
   <Router>
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/nfc_tag" element={<App server="http://199.250.210.176:3000" />} />
+      <Route path="/nfc_tag" element={<App server="http://localhost:5001/nfc" />} />
       <Route path="*" element={<Navigate to="/" />} /> {/* Catch-all route */}
     </Routes>
   </Router>
