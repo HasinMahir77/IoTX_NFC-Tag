@@ -1,4 +1,4 @@
-.guitar-info {
+.instrument-info {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -8,15 +8,14 @@
     background-color: aliceblue;
 }
 
-.guitar-icon {
-    width: 100px; /* Set the desired width */
-    /* border: 2px solid #a6a6b1; */
+.instrument-icon {
+    width: 100px;
     border-radius: 50%;
     position: relative;
     top: 3vh;
 }
 
-.guitar-info h2 {
+.instrument-info h2 {
     margin-bottom: 3vh;
     color: black;
     position: relative;
@@ -37,7 +36,7 @@
     background-color: white;
 }
 
-.guitar-info div form {
+.instrument-info div form {
     margin: 30px;
     display: flex;
     flex-direction: column;
@@ -45,7 +44,7 @@
     align-items: center;
 }
 
-.guitar-info div form div {
+.instrument-info div form div {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -53,13 +52,13 @@
     width: 100%;
 }
 
-.guitar-info div form div label {
+.instrument-info div form div label {
     font-weight: 500;
 }
 
-.guitar-info div form button {
+.instrument-info div form button {
     border-radius: 10px;
-    align-self: center; /* Center the button within the form */
+    align-self: center;
 }
 
 .cropper-container {
@@ -80,12 +79,12 @@
     width: 80%;
 }
 
-.urlHeader{
+.urlHeader {
     padding-bottom: 2rem;
 }
 
-/* Styles for the PairGuitar component */
-.pair-guitar-container {
+/* Styles for the PairInstrument component */
+.pair-instrument-container {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -97,7 +96,7 @@
     background-color: aliceblue;
 }
 
-.pair-guitar-container form {
+.pair-instrument-container form {
     width: 100%;
     color: black;
     text-align: left;
