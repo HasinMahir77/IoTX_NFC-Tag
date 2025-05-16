@@ -5,6 +5,7 @@
   justify-content: center;
   display: flex;
   flex-direction: column;
+  background-color: aliceblue;
 }
 .mainDiv{
   display: flex;
